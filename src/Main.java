@@ -13,59 +13,63 @@ public class Main {
         }
 
         Scanner scanner = new Scanner(System.in);
-        System.out.println("Inserisci il nome del piatto da inserire: ");
-        String nomePiatto = scanner.nextLine();
-        System.out.println("Inserisci il prezzo del piatto da inserire: ");
-        float prezzo = scanner.nextFloat();
-        scanner.nextLine();
-        System.out.println("Inserisci la quantità del piatto da inserire: ");
-        int quantita = scanner.nextInt();
-        scanner.nextLine();
 
-        System.out.println("Creiamo la nostra bellissima tabella");
-        System.out.println("Inserire nome della tabella: ");
-        String tableName = scanner.nextLine();
-        System.out.println("Inserire numero di parametri: ");
-        int numeroParam = scanner.nextInt();
-        scanner.nextLine();
-        ArrayList<String> params = new ArrayList<>();
-        for (int i = 0; i < numeroParam; i++) {
-            System.out.println("Inserire il parametro e i relativi dati (non primary key): ");
-            params.add(scanner.nextLine());
-        }
-        System.out.println("Inserire quantità primary key: ");
-        int numeroPrimary = scanner.nextInt();
-        scanner.nextLine();
-        ArrayList<String> primaryKeys = new ArrayList<>();
-        for (int i = 0; i < numeroPrimary; i++) {
-            System.out.println("Inserire il primary key: ");
-            primaryKeys.add(scanner.nextLine());
-        }
-        System.out.println("Inserire numero di foreign key: ");
-        int numeroForeign = scanner.nextInt();
-        scanner.nextLine();
-        ArrayList<String[]> foreignKeys = new ArrayList<String[]>();
-        for (int i = 0; i < numeroPrimary; i++) {
-            String[] temp = new String[3];
-            System.out.println("Inserire nome foreign key key: ");
-            temp[0] = scanner.nextLine();
-            System.out.println("Inserire tabella della foreign key: ");
-            temp[1] = scanner.nextLine();
-            System.out.println("Inserire campo altra tabella della foreign key: ");
-            temp[2] = scanner.nextLine();
-        }
+        String query;
+        int mod;
+        do{
+            System.out.println("Premere 1 per vedere il menu" +
+                    "\nPremere 2  per aggiungere un piatto al menu" +
+                    "\nPremere 3 per moficare un piatto del menu" +
+                    "\nPremere 4 per cancellare un piatto dal menu" +
+                    "\nPremere 5 per uscire dal menu");
+            mod = scanner.nextInt();
 
-        System.out.println("Inserire la nostra bellissima query");
-        String query = "SELECT ?, ? FROM Menu WHERE prezzo > ?";
+            switch (mod) {
+                case 1:
+                    System.out.printf(db.selectAll());
+                    break;
+                case 2:
+                    query = "INSERT INTO menu(nome_piatto, prezzo, quantita) VALUES (?, ?, ?)";
 
+                    System.out.println("Inserisci un nome del nuovo piatto");
+                    String nome = scanner.next();
 
-        if(db.insert(nomePiatto, prezzo, quantita))
-            System.out.println("Piatto inserito con successo");
+                    System.out.println("Inserisci il prezzo del nuovo piatto");
+                    float prezzo = scanner.nextFloat();
 
-        if(db.create(tableName, params, primaryKeys, foreignKeys))
-            System.out.println("Tabella creata con successo");
+                    System.out.println("Inserisci la quantità del nuovo piatto");
+                    int quant = scanner.nextInt();
 
-        System.out.println(db.select(query, "nome_piatto", "prezzo", 3.5));
-        System.out.println(db.selectAll());
+                    db.insert(query, nome, prezzo, quant);
+                    break;
+                case 3:
+                    query = "UPDATE menu SET nome_piatto = ?, prezzo = ?, quantita = ? WHERE id_piatto = ?";
+                    System.out.printf(db.selectAll());
+
+                    System.out.println("inserire l'id del piatto che si vuole modificare");
+                    int id = scanner.nextInt();
+
+                    System.out.println("nuovo nome");
+                    String newNome = scanner.next();
+
+                    System.out.println("nuovo prezzo");
+                    float newPrezzo = scanner.nextFloat();
+
+                    System.out.println("nuovo nome");
+                    int newQuantita = scanner.nextInt();
+
+                    db.update(query, id, newNome, newPrezzo, newQuantita);
+                    break;
+                case 4:
+                    query = "DELETE FROM menu WHERE id_piatto = ?";
+                    System.out.printf(db.selectAll());
+
+                    System.out.println("selezionare l'id del piatto che si vuole cancellare");
+                    int deletePiatto = scanner.nextInt();
+
+                    db.delete(query, deletePiatto);
+                    break;
+            }
+        } while(mod != 5);
     }
 }

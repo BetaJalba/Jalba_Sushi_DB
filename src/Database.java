@@ -15,7 +15,6 @@ public class Database {
     public String selectAll() {
         String result = "";
 
-        //Controlla connessione al database
         try {
             if(connection == null || !connection.isValid(5)){
                 System.err.println("Errore di connessione al database");
@@ -49,9 +48,7 @@ public class Database {
         return result;
     }
 
-    public boolean insert(String nomePiatto, float prezzo, int quantita) {
-
-        //Controlla connessione al database
+    public boolean insert(String sql, Object... params) {
         try {
             if(connection == null || !connection.isValid(5)){
                 System.err.println("Errore di connessione al database");
@@ -62,29 +59,22 @@ public class Database {
             return false;
         }
 
-        String query = "INSERT INTO menu(nome_piatto, prezzo, quantita) VALUES (?, ?, ?)";
-
         try {
-            PreparedStatement statement = connection.prepareStatement(query);
+            PreparedStatement stmt = connection.prepareStatement(sql);
 
-            statement.setString(1, nomePiatto);
-            statement.setFloat(2, prezzo);
-            statement.setInt(3, quantita);
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
+            }
 
-            statement.executeUpdate();
-
-
+            stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.err.println("Errore di query: " + e.getMessage());
             return false;
         }
-
-
-        return true;
     }
 
-    public boolean create(String tableName, ArrayList<String> params, ArrayList<String> primaryKeys, ArrayList<String[]> foreignKeys) {
-        //Controlla connessione al database
+    public boolean create(String sql, Object... params) {
         try {
             if(connection == null || !connection.isValid(5)){
                 System.err.println("Errore di connessione al database");
@@ -96,41 +86,18 @@ public class Database {
         }
 
         try {
-            Statement statement = connection.createStatement();
+            PreparedStatement stmt = connection.prepareStatement(sql);
 
-            String query = "CREATE TABLE " + tableName + " (";
-
-            for (int i = 0; i < params.size(); i++) {
-                query += params.get(i);
-                query += ",";
+            for (int i = 0; i < params.length; i++) {
+                stmt.setObject(i + 1, params[i]);
             }
 
-            query += "PRIMARY KEY (";
-
-            for (int i = 0; i < primaryKeys.size(); i++) {
-                query += primaryKeys.get(i);
-
-                if (i != primaryKeys.size() - 1)
-                    query += ",";
-            }
-
-            query += "),";
-
-            for (int i = 0; i < foreignKeys.size(); i++) {
-                query += "FOREIGN KEY (" + foreignKeys.get(i)[0] + ") REFERENCES " + foreignKeys.get(i)[1] + "(" + foreignKeys.get(i)[2] + ")";
-                if (i != foreignKeys.size() - 1)
-                    query += ",";
-            }
-
-            query += ")";
-
+            stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.err.println("Errore di query: " + e.getMessage());
             return false;
         }
-
-
-        return true;
     }
 
     public ResultSet select(String sql, Object... params) {
@@ -158,15 +125,15 @@ public class Database {
         }
     }
 
-    public int update(String sql, Object... params) {
+    public boolean update(String sql, Object... params) {
         try {
             if(connection == null || !connection.isValid(5)){
                 System.err.println("Errore di connessione al database");
-                return -1;
+                return false;
             }
         } catch (SQLException e) {
             System.err.println("Errore di connessione al database");
-            return -1;
+            return false;
         }
 
         try {
@@ -176,22 +143,23 @@ public class Database {
                 stmt.setObject(i + 1, params[i]);
             }
 
-            return stmt.executeUpdate();
+            stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.err.println("Errore di query: " + e.getMessage());
-            return -1;
+            return false;
         }
     }
 
-    public int delete(String sql, Object... params) {
+    public boolean delete(String sql, Object... params) {
         try {
             if(connection == null || !connection.isValid(5)){
                 System.err.println("Errore di connessione al database");
-                return -1;
+                return false;
             }
         } catch (SQLException e) {
             System.err.println("Errore di connessione al database");
-            return -1;
+            return false;
         }
 
         try {
@@ -201,10 +169,13 @@ public class Database {
                 stmt.setObject(i + 1, params[i]);
             }
 
-            return stmt.executeUpdate();
+            stmt.executeUpdate();
+            return true;
         } catch (SQLException e) {
             System.err.println("Errore di query: " + e.getMessage());
-            return -1;
+            return false;
         }
     }
+
+    // si sono tutti identici
 }
